@@ -1,10 +1,4 @@
-#include <wiringPi.h>
-#include <stdio.h>
-#include <stdlib.h> 
-#include <unistd.h>
-int direction = 1;
-int pinStep = 7;
-int pinDirection = 0;
+#include "floppy.h"
 
 
 
@@ -14,12 +8,13 @@ int main(int argc, int ** argv) {
 
 	if (wiringPiSetup() == -1)
 		exit (1);
-		
-	printf("Floppy Players\nBy k3rnL\nv1.02\n\n");
+	//jouerNote(10000,100);
+	position = 0;	
+	printf("Floppy Players\nBy k3rnL\nv1.09\n\n");
 	printf("Frequence. 1-7 aigu / 8-12 medium / 13-25 basse");
-	printf("\n\n1.Note\n2.Modulation");
+	printf("\n\n1.Note\n2.Modulation\n3.Test mario brosse(toi les fesses)");
 	scanf("%d", &choix);
-	
+	//changeDirection();
 	if (choix == 1) note();
 	if (choix == 2) modulation();
 	if (choix == 3) test();
@@ -68,9 +63,10 @@ void jouerNote(int frequence, int temps) {
 	pinMode(pinStep, OUTPUT);
 	pinMode(pinDirection, OUTPUT);
 	
-	changeDirection();
+	
 	
 	while(i < temps) {
+		compteurPosition();
 		i++;
 		digitalWrite(pinStep, 1);
 		digitalWrite(pinStep, 0);
@@ -122,6 +118,14 @@ void changeDirection() {
 	}
 }
 
+int directionPouet() {
+	if (direction == 1) {
+			return 1;
+		} else {
+			return 0;
+	}
+}
+	
 void jouerFrequence(int freq, int t)  // freq in hz, t in ms
 {  
   // Added special handling for rests (avoids pops)
@@ -130,7 +134,7 @@ void jouerFrequence(int freq, int t)  // freq in hz, t in ms
     delay(t);
     return;
   }
- 
+
   int hperiod;                               //calculate 1/2 period in us
   long cycles, i;
 
@@ -145,60 +149,106 @@ void jouerFrequence(int freq, int t)  // freq in hz, t in ms
       delayMicroseconds(hperiod);
       digitalWrite(pinStep, LOW); 
       delayMicroseconds(hperiod - 1);     // - 1 to make up for digitaWrite overhead
+	  compteurPosition();
   }
 
 }
 
+void compteurPosition() {
+	if(directionPouet()) {
+	
+		if(position == 64) {
+			changeDirection();
+		} else if (position < 64) {
+			position++;
+		}
+		
+	} else if (directionPouet() == 0) {
+		
+		if(position == 0) {
+			changeDirection();
+		} else if (position > 0) {
+			position--;
+		}
+	}
+}
 
-void PlaySong(int songIndex, int tempo)
+
+void PlaySong(int index,int tempo)
 {
   
-  if (songIndex < 0 || songIndex >= cNumSongs)
-  {
-    return;
-  }
-  
 
-  
-  float* song = songs[songIndex];
-  
-  int x;
-  for(x= 0; x<10000; x=x+2)
-  {
-    int noteval = (int)(song[x] / 64.0f);
-    int dur = (int)((float)tempo * song[x+1]);
-    
-    if(dur < 0)
-      break;
-    
-    freqout(noteval, dur);
- 
-    for (int i=0; i<6; i++)
-    {
-      boolean ledOn = (i == (millis() % 6));
-      digitalWrite(regionLEDs[i], ledOn ? HIGH : LOW);
-    }
+  /**********MUSIQUE**********/
 
-    delay(10);
-  }
+float song0[] = 
+  {
+    E2,EIGHTH, E2,QUARTER, E2,EIGHTH, REST,EIGHTH, C2,EIGHTH, E2,QUARTER, G2,HALF, G,HALF, 
+    REST,ETERNITY
+  };
+float song1[] = 
+  {
+    C2,DOTTED_QUARTER, G,EIGHTH, REST,QUARTER, E,QUARTER, REST,EIGHTH, A2,QUARTER, B2,EIGHTH, REST,EIGHTH, A2S,EIGHTH, A2,QUARTER,
+    G,DOTTED_EIGHTH, E2,DOTTED_EIGHTH, G2,EIGHTH, A3,QUARTER, F2,EIGHTH, G2,EIGHTH, REST,EIGHTH, E2,QUARTER, C2,EIGHTH, D2,EIGHTH, B2,DOTTED_QUARTER,
+    REST,ETERNITY  
+  };
+float song2[] = 
+  {
+    C2,DOTTED_QUARTER, G,EIGHTH, REST,QUARTER, E,QUARTER, REST,EIGHTH, A2,QUARTER, B2,EIGHTH, REST,EIGHTH, A2S,EIGHTH, A2,QUARTER,
+    G,DOTTED_EIGHTH, E2,DOTTED_EIGHTH, G2,EIGHTH, A3,QUARTER, F2,EIGHTH, G2,EIGHTH, REST,EIGHTH, E2,QUARTER, C2,EIGHTH, D2,EIGHTH, B2,DOTTED_QUARTER,
+    REST,ETERNITY  
+  };
+float song3[] = 
+  {
+    REST,QUARTER, G2,EIGHTH, F2S,EIGHTH, F2,EIGHTH, D2S,QUARTER, E2,EIGHTH, REST,EIGHTH, GS,EIGHTH, A2,EIGHTH, C2,EIGHTH, REST,EIGHTH, A2,EIGHTH, C2,EIGHTH, D2,EIGHTH,
+    REST,QUARTER, G2,EIGHTH, F2S,EIGHTH, F2,EIGHTH, D2S,QUARTER, E2,EIGHTH, REST,EIGHTH, C3,QUARTER, C3,EIGHTH, C3,HALF,
+    REST,ETERNITY  
+  };
+float song4[] = 
+  {
+    REST,QUARTER, G2,EIGHTH, F2S,EIGHTH, F2,EIGHTH, D2S,QUARTER, E2,EIGHTH, REST,EIGHTH, GS,EIGHTH, A2,EIGHTH, C2,EIGHTH, REST,EIGHTH, A2,EIGHTH, C2,EIGHTH, D2,EIGHTH,
+    REST,QUARTER, D2S,QUARTER, REST,EIGHTH, D2,DOTTED_QUARTER, C2,HALF, REST,HALF,
+    REST,ETERNITY  
+  };
+float song5[] = 
+  {
+    C2,EIGHTH, C2,QUARTER, C2,EIGHTH, REST,EIGHTH, C2,EIGHTH, D2,QUARTER, E2,EIGHTH, C2,QUARTER, A2,EIGHTH, G,HALF,
+    C2,EIGHTH, C2,QUARTER, C2,EIGHTH, REST,EIGHTH, C2,EIGHTH, D2,EIGHTH, E2,EIGHTH, REST,WHOLE,
+    REST,ETERNITY  
+  };
+float song6[] = 
+{
+    C2,EIGHTH, C2,QUARTER, C2,EIGHTH, REST,EIGHTH, C2,EIGHTH, D2,QUARTER, E2,EIGHTH, C2,QUARTER, A2,EIGHTH, G,HALF,
+    E2,EIGHTH, E2,QUARTER, E2,EIGHTH, REST,EIGHTH, C2,EIGHTH, E2,QUARTER, G2,QUARTER, REST, HALF,
+    REST,ETERNITY  
+};
+
+float* songs[] = {
+	song0,
+	song1,
+	song2,
+	song3,
+	song4,
+	song5,
+	song6, };
+  printf("pouet ");
+	int x;
+	 
+	 for(x= 0; x<10000; x=x+2)
+	{
+		int noteval = (int)(song6[x] / 64.0f);
+		int dur = (int)((float)tempo * song6[x+1]);
+		
+		if(dur < 0)
+		  break;
+		
+		jouerFrequence(noteval, dur);
+
+		delay(10);
+	}
+  
 }
 
 void test() {
-	jouerNote(10000, 10);
-	jouerNote(20000, 15);
-	jouerNote(15000, 5);
-	jouerNote(25000, 20);
-	jouerNote(10000, 10);
-	jouerNote(20000, 15);
-	jouerNote(15000, 5);
-	jouerNote(25000, 20);
-	jouerNote(10000, 10);
-	jouerNote(20000, 15);
-	jouerNote(15000, 5);
-	jouerNote(25000, 20);
-	jouerNote(10000, 10);
-	jouerNote(20000, 15);
-	jouerNote(15000, 5);
-	jouerNote(25000, 20);
+	PlaySong(1,140);
 
 }
