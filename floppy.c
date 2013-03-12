@@ -35,7 +35,7 @@ void note() {
 		scanf("%d",&frequence);
 		if (frequence == 0) break;
 		
-		printf("Entrer durée de note : ");
+		printf("Entrer durï¿½e de note : ");
 		scanf("%d", &temps);
 		
 		jouerNote(frequence, temps);
@@ -55,7 +55,7 @@ void modulation() {
 		printf("Entrer frequence max : ");
 		scanf("%d", &freqMax);
 		
-		printf("Entrer nombre de fois a répéter : ");
+		printf("Entrer nombre de fois a rï¿½pï¿½ter : ");
 		scanf("%d", &repeat);
 		
 		jouerModulation(freqMin, freqMax, repeat);
@@ -120,6 +120,67 @@ void changeDirection() {
 			digitalWrite(pinDirection, 0);
 			direction = 1;
 	}
+}
+
+void jouerFrequence(int freq, int t)  // freq in hz, t in ms
+{  
+  // Added special handling for rests (avoids pops)
+  if (freq == 0)
+  {
+    delay(t);
+    return;
+  }
+ 
+  int hperiod;                               //calculate 1/2 period in us
+  long cycles, i;
+
+  pinMode(pinStep, OUTPUT);                   // turn on output pin
+  hperiod = (500000 / freq) - 7;             // subtract 7 us to make up for digitalWrite overhead
+  cycles = ((long)freq * (long)t) / 1000;    // calculate cycles
+  
+  for (i=0; i<= cycles; i++)
+  {
+      // play note for t ms 
+      digitalWrite(pinStep, HIGH); 
+      delayMicroseconds(hperiod);
+      digitalWrite(pinStep, LOW); 
+      delayMicroseconds(hperiod - 1);     // - 1 to make up for digitaWrite overhead
+  }
+
+}
+
+
+void PlaySong(int songIndex, int tempo)
+{
+  
+  if (songIndex < 0 || songIndex >= cNumSongs)
+  {
+    return;
+  }
+  
+
+  
+  float* song = songs[songIndex];
+  
+  int x;
+  for(x= 0; x<10000; x=x+2)
+  {
+    int noteval = (int)(song[x] / 64.0f);
+    int dur = (int)((float)tempo * song[x+1]);
+    
+    if(dur < 0)
+      break;
+    
+    freqout(noteval, dur);
+ 
+    for (int i=0; i<6; i++)
+    {
+      boolean ledOn = (i == (millis() % 6));
+      digitalWrite(regionLEDs[i], ledOn ? HIGH : LOW);
+    }
+
+    delay(10);
+  }
 }
 
 void test() {
