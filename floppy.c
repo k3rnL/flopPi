@@ -10,7 +10,7 @@ int main(int argc, int ** argv) {
 		exit (1);
 	//jouerNote(10000,100);
 	position = 0;	
-	printf("Floppy Players\nBy k3rnL\nv1.09\n\n");
+	printf("Floppy Players\nBy k3rnL\nv1.1\n\n");
 	printf("Frequence. 1-7 aigu / 8-12 medium / 13-25 basse");
 	printf("\n\n1.Note\n2.Modulation\n3.Test mario brosse(toi les fesses)");
 	scanf("%d", &choix);
@@ -230,13 +230,13 @@ float* songs[] = {
 	song4,
 	song5,
 	song6, };
-  printf("pouet ");
+  printf("pouet %d", index);
 	int x;
-	 
+	float* song = songs[index]; 
 	 for(x= 0; x<10000; x=x+2)
 	{
-		int noteval = (int)(song6[x] / 64.0f);
-		int dur = (int)((float)tempo * song6[x+1]);
+		int noteval = (int)(song[x] / 64.0f);
+		int dur = (int)((float)tempo * song[x+1]);
 		
 		if(dur < 0)
 		  break;
@@ -249,6 +249,14 @@ float* songs[] = {
 }
 
 void test() {
-	PlaySong(1,140);
+	int i = 0;
+	while(1) {
+	PlaySong(i,140);
+	i++;
+	if(i == 7) break;
+	}
+
+	printf("POUET");
+
 
 }
